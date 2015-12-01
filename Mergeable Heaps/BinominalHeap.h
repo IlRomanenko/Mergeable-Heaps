@@ -21,11 +21,18 @@ class BinominalHeap : public IMergeableHeap<int>
 
         ~BinominalTree()
         {
+            for (int i = 0; i < children.size(); i++)
+            {
+                delete children[i];
+                children[i] = nullptr;
+            }
+            /*
             for_each(children.begin(), children.end(), [](auto* tree) mutable
             {
                 delete tree;
                 tree = nullptr;
-            });
+            });*/
+
             children.clear();
         }
     };
@@ -89,7 +96,7 @@ class BinominalHeap : public IMergeableHeap<int>
 
     void CompressSize()
     {
-        if (heap.back() == nullptr)
+        if (heap.back() == nullptr && heap.size() > InitialSize)
             heap.pop_back();
     }
 
@@ -124,20 +131,28 @@ public:
         Meld(BinominalHeap(new BinominalTree(object)));
     }
 
-    void MakeHeap(const vector<int> &v)
+    void MakeHeap(const vector<int> &v) override
     {
         for_each(v.begin(), v.end(), [this](int x) { AddElement(x); });
     }
 
-    int PeekMin() const
+    int PeekMin() const override
     {
-        return int();
+        int min = INT_MAX, size = heap.size();
+        for (uint i = 0; i < size; i++)
+        {
+            if (heap[i] != nullptr && heap[i]->data < min)
+            {
+                min = heap[i]->data;
+            }
+        }
+        return min;
     }
 
     ///<summary>
     ///Extract minimum element from heap.
     ///</summary>
-    int ExtractMin()
+    int ExtractMin() override
     {
         uint size = heap.size();
         int min = INT_MAX, index = -1;
@@ -155,6 +170,7 @@ public:
         Meld(BinominalHeap(tree->children));
         tree->children.clear();
         delete tree;
+        tree = nullptr;
         CompressSize();
         return min;
     }
@@ -180,15 +196,26 @@ public:
         if (additional != nullptr)
             heap.push_back(additional);
         RecalcSize();
+        add_heap.heap.clear();
     }
 
-    bool IsEmpty()
+    bool IsEmpty() override
     {
         return (curSize == 0);
     }
 
+    void Clear()
+    {
+        for (int i = 0; i < heap.size(); i++)
+        {
+            delete heap[i];
+            heap[i] = nullptr;
+        }
+        curSize = 0;
+    }
+
     ~BinominalHeap()
     {
-        heap.clear();
+        Clear();
     }
 };

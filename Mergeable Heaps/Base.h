@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include <numeric>
+#include <cstdio>
 
 using namespace std;
 

@@ -25,6 +25,7 @@ public:
         }
     }
     virtual bool IsEmpty() = 0;
+    virtual void Clear() = 0;
     virtual ~IMergeableHeap() { }
 };
 

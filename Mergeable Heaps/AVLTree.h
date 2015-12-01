@@ -105,3 +105,18 @@ p_avl insert(p_avl root, int key)
         root->right = insert(root->right, key);
     return balance(root);
 }
+
+int getMin(p_avl root)
+{
+    if (!root->left)
+        return root->key;
+    return getMin(root->left);
+}
+
+p_avl removeMin(p_avl root) 
+{
+    if (root->left == nullptr)
+        return root->right;
+    root->left = removeMin(root->left);
+    return balance(root);
+}
