@@ -11,12 +11,14 @@ class BinominalHeap : public IMergeableHeap<int>
     struct BinominalTree
     {
         vector<BinominalTree*> children;
-        int data;
+        int data, size;
     
         BinominalTree(const int& key)
         {
             data = key;
+            size = 1;
         }
+
         ~BinominalTree()
         {
             for_each(children.begin(), children.end(), [](auto* tree) mutable
@@ -30,17 +32,17 @@ class BinominalHeap : public IMergeableHeap<int>
 
     typedef BinominalTree* Node;
 
-    vector<Node> heap;
-
     BinominalHeap(Node && tree)
     {
         heap.resize(InitialSize);
         heap[0] = tree;
+        curSize = 1;
     }
     
-    BinominalHeap(vector<Node> nodes)
+    BinominalHeap(vector<Node> &nodes)
     {
         heap.swap(nodes);
+        RecalcSize();
     }
 
     Node MergeTrees(Node first, Node second)
@@ -48,11 +50,13 @@ class BinominalHeap : public IMergeableHeap<int>
         if (first->data < second->data)
         {
             first->children.push_back(second);
+            first->size += second->size;
             return first;
         }
         else
         {
             second->children.push_back(first);
+            second->size += first->size;
             return second;
         }
     }
@@ -83,6 +87,26 @@ class BinominalHeap : public IMergeableHeap<int>
         }
     }
 
+    void CompressSize()
+    {
+        if (heap.back() == nullptr)
+            heap.pop_back();
+    }
+
+    void RecalcSize()
+    {
+        curSize = accumulate(heap.begin(), heap.end(), 0, [](int sum, Node ptr)
+        {
+            return sum + (ptr == nullptr ? 0 : ptr->size);
+        });
+    }
+
+private:
+
+    vector<Node> heap;
+
+    int curSize;
+
 public:
 
     BinominalHeap()
@@ -92,6 +116,7 @@ public:
         {
             ptr = nullptr;
         });
+        curSize = 0;
     }
 
     void AddElement(const int& object)
@@ -130,6 +155,7 @@ public:
         Meld(BinominalHeap(tree->children));
         tree->children.clear();
         delete tree;
+        CompressSize();
         return min;
     }
 
@@ -153,15 +179,12 @@ public:
         }
         if (additional != nullptr)
             heap.push_back(additional);
+        RecalcSize();
     }
 
     bool IsEmpty()
     {
-        bool empty = true;
-        for (uint i = 0; i < heap.size(); i++)
-            if (heap[i] != nullptr)
-                empty = false;
-        return empty;
+        return (curSize == 0);
     }
 
     ~BinominalHeap()

@@ -2,13 +2,13 @@
 #include "Base.h"
 
 template <typename T>
-    class IMergeableHeap
+class IMergeableHeap
 {
 public:
     virtual void AddElement(const T& object) = 0;
     virtual void MakeHeap(const vector<T> &v) = 0;
     virtual T PeekMin() const = 0;
-    
+
     ///<summary>
     ///Extract minimum element from heap.
     ///</summary>
@@ -26,4 +26,83 @@ public:
     }
     virtual bool IsEmpty() = 0;
     virtual ~IMergeableHeap() { }
+};
+
+
+template <typename InnerData>
+    class BinaryTree
+{
+protected:
+    InnerData data;
+    BinaryTree *left, *right;
+public:
+
+    BinaryTree()
+    {
+        data = InnerData();
+        left = right = nullptr;
+    }
+
+    BinaryTree(InnerData &key) : BinaryTree()
+    {
+        data = key;
+    }
+
+    BinaryTree(BinaryTree & tree)
+    {
+        data = tree.data;
+        left = tree.left;
+        right = tree.right;
+    }
+
+    BinaryTree(BinaryTree && tree)
+    {
+        data = tree.data;
+        left = tree.left;
+        right = tree.right;
+    }
+
+    BinaryTree*& Left()
+    {
+        return left;
+    }
+
+    BinaryTree*& Right()
+    {
+        return right;
+    }
+
+    InnerData& Data()
+    {
+        return data;
+    }
+
+    void Data(InnerData& value)
+    {
+        data = value;
+    }
+
+    void Left(BinaryTree* value)
+    {
+        left = value;
+    }
+
+    void Right(BinaryTree* value)
+    {
+        right = value;
+    }
+
+    virtual ~BinaryTree()
+    {
+        if (left != nullptr)
+        {
+            delete left;
+            left = nullptr;
+        }
+        if (right != nullptr)
+        {
+            delete right;
+            right = nullptr;
+        }
+    }
 };
