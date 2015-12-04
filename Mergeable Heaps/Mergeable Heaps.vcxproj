@@ -127,9 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="AVLTree.h" />
     <ClInclude Include="Base.h" />
     <ClInclude Include="BinominalHeap.h" />
@@ -137,6 +134,9 @@
     <ClInclude Include="IMergeableHeap.h" />
     <ClInclude Include="LeftistHeap.h" />
     <ClInclude Include="SkewHeap.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
