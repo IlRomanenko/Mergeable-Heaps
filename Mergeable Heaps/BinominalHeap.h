@@ -1,6 +1,7 @@
 #pragma once
 #include "Base.h"
 #include "IMergeableHeap.h"
+#include <list>
 
 class BinominalHeap : public IMergeableHeap<int>
 {
@@ -10,34 +11,48 @@ class BinominalHeap : public IMergeableHeap<int>
 
     struct BinominalTree
     {
-        vector<BinominalTree*> children;
         int data, size;
-    
-        BinominalTree(const int& key)
+        BinominalTree *subTree, *prevTree;
+
+        BinominalTree(const int &key)
         {
             data = key;
             size = 1;
+            subTree = prevTree = nullptr;
         }
-
         ~BinominalTree()
         {
-            for (int i = 0; i < children.size(); i++)
-            {
-                delete children[i];
-                children[i] = nullptr;
-            }
-            /*
-            for_each(children.begin(), children.end(), [](auto* tree) mutable
-            {
-                delete tree;
-                tree = nullptr;
-            });*/
-
-            children.clear();
+            delete subTree;
+            delete prevTree;
+            subTree = prevTree = nullptr;
         }
     };
 
     typedef BinominalTree* Node;
+
+    vector<Node> getChildren(Node root)
+    {
+        root = root->subTree;
+        vector<Node> v;
+        while (root != nullptr)
+        {
+            v.push_back(root);
+            root = root->prevTree;
+        }
+        for_each(v.begin(), v.end(), [](Node &ptr) mutable
+        {
+            ptr->prevTree = nullptr;
+        });
+        reverse(v.begin(), v.end());
+        return v;
+    }
+
+    void AddSubTree(Node &root, Node &additional)
+    {
+        additional->prevTree = root->subTree;
+        root->subTree = additional;
+        root->size += additional->size;
+    }
 
     BinominalHeap(Node && tree)
     {
@@ -45,8 +60,14 @@ class BinominalHeap : public IMergeableHeap<int>
         heap[0] = tree;
         curSize = 1;
     }
-    
-    BinominalHeap(vector<Node> &nodes)
+
+    BinominalHeap(vector<Node> & nodes)
+    {
+        heap.swap(nodes);
+        RecalcSize();
+    }
+
+    BinominalHeap(vector<Node> && nodes)
     {
         heap.swap(nodes);
         RecalcSize();
@@ -56,14 +77,12 @@ class BinominalHeap : public IMergeableHeap<int>
     {
         if (first->data < second->data)
         {
-            first->children.push_back(second);
-            first->size += second->size;
+            AddSubTree(first, second);
             return first;
         }
         else
         {
-            second->children.push_back(first);
-            second->size += first->size;
+            AddSubTree(second, first);
             return second;
         }
     }
@@ -96,7 +115,7 @@ class BinominalHeap : public IMergeableHeap<int>
 
     void CompressSize()
     {
-        if (heap.back() == nullptr && heap.size() > InitialSize)
+        while (heap.back() == nullptr && heap.size() > InitialSize)
             heap.pop_back();
     }
 
@@ -119,7 +138,7 @@ public:
     BinominalHeap()
     {
         heap.resize(InitialSize);
-        for_each(heap.begin(), heap.end(), [](BinominalTree *ptr) mutable
+        for_each(heap.begin(), heap.end(), [](Node &ptr) mutable
         {
             ptr = nullptr;
         });
@@ -165,26 +184,23 @@ public:
             }
         }
 
-        BinominalTree* tree = heap[index];
+        Node tree = heap[index];
         heap[index] = nullptr;
-        Meld(BinominalHeap(tree->children));
-        tree->children.clear();
+        Meld(BinominalHeap(getChildren(tree)));
+        tree->subTree = nullptr;
         delete tree;
         tree = nullptr;
         CompressSize();
         return min;
     }
 
-    ///<summary> 
-    ///Meld this heap with add_heap, add_heap will be destroyed. Trivial implementation for all kinds of heaps.
-    ///</summary>
     void Meld(BinominalHeap &add_heap)
     {
         uint max_size = max(add_heap.heap.size(), heap.size());
         add_heap.heap.resize(max_size);
         heap.resize(max_size);
-        
-        BinominalTree *additional = nullptr, *result = nullptr, *new_additional = nullptr;
+
+        Node additional = nullptr, result = nullptr, new_additional = nullptr;
 
         for (uint i = 0; i < max_size; i++)
         {
@@ -206,11 +222,11 @@ public:
 
     void Clear()
     {
-        for (int i = 0; i < heap.size(); i++)
+        for_each(heap.begin(), heap.end(), [](Node &ptr) mutable
         {
-            delete heap[i];
-            heap[i] = nullptr;
-        }
+            delete ptr;
+            ptr = nullptr;
+        });
         curSize = 0;
     }
 

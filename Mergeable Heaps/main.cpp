@@ -316,68 +316,6 @@ TEST_F(HeapTest, FastExtractFromBinominal)
     cout << endl << endl;
 }
 
-TEST(SimpleTestCase, AVL)
-{
-    set<int> st;
-    vector<int> ans1, ans2, source;
-
-    const uint SpeedTestSize = 1000 * 100;
-
-    ans1.reserve(SpeedTestSize);
-    ans2.reserve(SpeedTestSize);
-
-    steady_clock clock;
-
-    uniform_int_distribution<int> random;
-    default_random_engine engine;
-
-    for (uint i = 0; i < SpeedTestSize; i++)
-        source.push_back(random(engine));
-
-    auto before_set_push = clock.now();
-
-    for (uint i = 0; i < SpeedTestSize; i++)
-        st.insert(source[i]);
-
-    for (uint i = 0; i < SpeedTestSize; i++)
-    {
-        ans1.push_back(*st.begin());
-        st.erase(st.begin());
-    }
-
-    auto after_set_pop = clock.now();
-
-
-    p_avl root = nullptr;
-
-    auto before_heap_push = clock.now();
-
-    for (uint i = 0; i < SpeedTestSize; i++)
-        root = insert(root, source[i]);
-
-    for (uint i = 0; i < SpeedTestSize; i++)
-    {
-        ans2.push_back(getMin(root));
-        root = removeMin(root);
-    }
-
-    auto after_heap_pop = clock.now();
-
-    for (uint i = 0; i < SpeedTestSize; i++)
-    {
-        EXPECT_EQ(ans1[i], ans2[i]);
-    }
-
-    auto set_duration = after_set_pop - before_set_push;
-    auto heap_duration = after_heap_pop - before_heap_push;
-
-    cout << endl << endl;
-    cout << "Set duration : " << set_duration.count() / 1000.0 / 1000.0 << " ms" << endl;
-    cout << "AVL duration : " << heap_duration.count() / 1000.0 / 1000.0 << " ms" << endl;
-    cout << "Relative : " << heap_duration.count() / (double)set_duration.count() << endl;
-    cout << endl << endl;
-}
-
 int main(int argc, char** argv)
 {
     cout.precision(9);
