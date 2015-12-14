@@ -17,13 +17,7 @@ public:
     ///<summary> 
     ///Meld this heap with add_heap, add_heap will be destroyed. Trivial implementation for all kinds of heaps.
     ///</summary>
-    virtual void Meld(IMergeableHeap<T> &add_heap)
-    {
-        while (!add_heap.IsEmpty())
-        {
-            AddElement(add_heap.ExtractMin());
-        }
-    }
+    virtual void Meld(IMergeableHeap<T> *add_heap) = 0;
     virtual bool IsEmpty() = 0;
     virtual void Clear() = 0;
     virtual ~IMergeableHeap() { }
