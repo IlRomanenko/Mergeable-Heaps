@@ -194,6 +194,17 @@ public:
         return min;
     }
 
+    void Meld(IMergeableHeap <int> *heap)
+    {
+        if (heap is BinominalHeap)
+           Meld (*heap);
+        else
+           while (!heap->IsEmpty ())
+           {
+               AddElement (heap->ExtractMin ());
+           }
+    }
+
     void Meld(BinominalHeap &add_heap)
     {
         uint max_size = max(add_heap.heap.size(), heap.size());
