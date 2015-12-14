@@ -71,7 +71,17 @@ public:
         root = nullptr;
     }
 
-    // Унаследовано через IMergeableHeap
+    void Meld(IMergeableHeap <int> *heap)
+    {
+        if (heap is SkewHeap)
+           Meld (*heap);
+        else
+           while (!heap->IsEmpty ())
+           {
+               AddElement (heap->ExtractMin ());
+           }
+    }
+
     void AddElement(const int& object) override
     {
         Meld(SkewHeap(new SkewTree(SkewTreeData(object))));
